@@ -1,15 +1,41 @@
-## Put comments here that give an overall description of what your
-## functions do
-
 ## This function creates a special "matrix" object that can cache its inverse.
 
 makeCacheMatrix <- function(x = matrix()) {
   
-  # define objects to cache the matrix, and inverse 
-  previous_matrix <- NULL
-  solved_inverse <- NULL
-
+  ## define a object list that contains add and update functions
+  
+  ##initlize NULL object to hold the cached inverse
+  cached_inverse <- NULL
+  
+  ## Define the setting and updating functions 
+  
+  ### Define the set function 
+  #### this function will both set a new value for the matrix, and reset the cache 
+  set <- function(new_x) {
+    x <<- new_x
+    cached_inverse <<- NULL
+  }
+  
+  ### Define the get function
+  #### this function will get the matrix stored in the list 
+  get <- function() x
+  
+  ### Define the setinverse function
+  #### this function will set the value for the cached inverse 
+  setinverse <- function(new_inverse) cached_inverse <<- new_inverse
+  
+  ### Define getinverse function
+  #### this will get the cached inverse matrix
+  getinverse <- function() cached_inverse
+  
+  
+  ### Create a list with the defined functions
+  list(set = set, get = get, setinverse = setinverse, getinverse = getinverse)
 }
+
+
+
+
 
 
 ## This function computes the inverse of the special "matrix" returned by makeCacheMatrix above. 
@@ -17,16 +43,23 @@ makeCacheMatrix <- function(x = matrix()) {
 ## should retrieve the inverse from the cache.
 
 cacheSolve <- function(x, ...) {
-  ## check if the matrix has changed from cache
-  if(identical(x, previous_matrix)) {
-    ## if true, return cached inverse 
-    solved_inverse
-  }
-  ## else calculate inverse of 'x' and cache the result and input matrix
-  else {solved_inverse <<- solve(x)
-  previous_matrix <<- x
-    }
   
-  ## Return a matrix that is the inverse of 'x'
-  solved_inverse
+  ##get the cached inverse from the object list 
+  isitcached <- x$getinverse()
+  
+  ##determine if the cache exists; return cached value or calculate new
+  if(!is.null(isitcached)) {
+    ### cached - returned cached value
+    message("getting cached data")
+    return(isitcached)
+  } else {
+    ### not cached - get data  
+    matrix_data <- x$get()
+    ### not cached - calculate inverse 
+    isitcached <- solve(matrix_data)
+    ### not cached - cache value in list
+    x$setinverse(isitcached)
+    ### not cached - return new value
+    return(isitcached)
+  }
 }
